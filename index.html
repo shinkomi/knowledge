@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ナレッジ</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>🍓 ナレッジ</h1>
+      <input id="q" type="search" placeholder="フリーワード検索..." />
+    </header>
+    <div class="layout">
+      <nav><ul id="menu"></ul></nav>
+      <main>
+        <div id="status" class="status"></div>
+        <div id="cards" class="cards"></div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let data = { categories: [], items: [] };
+    let catFilter = "all";
+    let itemFilter = null;
+    let query = "";
+    const openCats = new Set();
+
+    const catLabel = (id) => data.categories.find((c) => c.id === id)?.label || id;
+
+    function addBtn(ul, label, active, onClick) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "nav-btn" + (active ? " active" : "");
+      btn.textContent = label;
+      btn.onclick = onClick;
+      li.appendChild(btn);
+      ul.appendChild(li);
+      return li;
+    }
+
+    function renderMenu() {
+      const menu = document.getElementById("menu");
+      menu.innerHTML = "";
+
+      addBtn(menu, "✨ すべて", catFilter === "all" && !itemFilter, () => {
+        catFilter = "all";
+        itemFilter = null;
+        render();
+      });
+
+      data.categories.forEach((c) => {
+        const children = data.items.filter(
+          (i) => i.category === c.id && i.parent === c.label
+        );
+
+        if (!children.length) {
+          addBtn(menu, c.label, catFilter === c.id && !itemFilter, () => {
+            catFilter = c.id;
+            itemFilter = null;
+            render();
+          });
+          return;
+        }
+
+        const li = document.createElement("li");
+        const details = document.createElement("details");
+
+        // 初回だけ全開
+        if (openCats.size === 0) {
+          data.categories.forEach(c => openCats.add(c.id));
+        }
+        details.open = openCats.has(c.id);
+
+        const summary = document.createElement("summary");
+        summary.textContent = c.label;
+        summary.className =
+          "nav-btn" + (catFilter === c.id && !itemFilter ? " active" : "");
+
+        summary.addEventListener("click", (e) => {
+          e.preventDefault();
+          const nextOpen = !details.open;
+          if (nextOpen) {
+            openCats.add(c.id);
+          } else {
+            openCats.delete(c.id);
+          }
+          catFilter = c.id;
+          itemFilter = null;
+          render();
+        });
+
+        const sub = document.createElement("ul");
+        sub.className = "sub";
+        children.forEach((ch) => {
+          addBtn(sub, " " + ch.title, itemFilter === ch.id, () => {
+            catFilter = c.id;
+            itemFilter = ch.id;
+            openCats.add(c.id);
+            render();
+          });
+        });
+
+        details.appendChild(summary);
+        details.appendChild(sub);
+        li.appendChild(details);
+        menu.appendChild(li);
+      });
+    }
+
+    function render() {
+      renderMenu();
+      const q = query.toLowerCase();
+      const list = data.items.filter((it) => {
+        if (itemFilter) return it.id === itemFilter;
+        if (catFilter !== "all" && it.category !== catFilter) return false;
+        if (!q) return true;
+        return [it.title, it.body, it.parent || "", catLabel(it.category), ...(it.tags || [])]
+          .join(" ").toLowerCase().includes(q);
+      });
+
+      document.getElementById("status").textContent = `表示中: ${list.length}件`;
+      document.getElementById("cards").innerHTML = list.length
+        ? list.map((it) => `
+            <article class="card">
+              <span class="badge">${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}</span>
+              <h2>${it.title}</h2>
+              <p>${it.body}</p>
+            </article>
+          `).join("")
+        : `<div class="card">該当するメモがありません</div>`;
+    }
+
+    document.getElementById("q").addEventListener("input", (e) => {
+      query = e.target.value.trim();
+      render();
+    });
+
+    fetch("./memos.json?_=" + Date.now())
+      .then((r) => r.json())
+      .then((json) => { data = json; render(); });
+  </script>
+</body>
+</html>
