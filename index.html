@@ -62,9 +62,9 @@
       if (initializedOpen) return;
       initializedOpen = true;
       // PCは初回全開、スマホは閉じて省スペース化
-      if (!isMobile()) {
-        data.categories.forEach((c) => openCats.add(c.id));
-      }
+      //if (!isMobile()) {
+      //  data.categories.forEach((c) => openCats.add(c.id));
+      //}
     }
 
     function addBtn(ul, label, active, onClick) {

@@ -1,6 +1,8 @@
 {
   "categories": [
     { "id": "recipe", "label": "レシピ" },
+    { "id": "gourmet", "label": "グルメ" },
+    { "id": "sightseeing", "label": "観光" },
     { "id": "pc", "label": "パソコン" },
     { "id": "smartphone", "label": "スマホ" },
     { "id": "game", "label": "ゲーム" }
@@ -87,6 +89,22 @@
       "body": "[材料(2人分)]\n・きゅうり(2本 / 約200g)\n・白いりごま(小さじ1)\n・白だし(大さじ2)\n・ごま油(大さじ1)\n・おろしにんにく(少々)\n・水(大さじ1)\n\n[作り方]\n1. きゅうりを食べやすい形に切り、材料をすべて合わせて馴染ませる\n2. 味が馴染んだら盛り付ける"
     },
     {
+      "id": "gourmet-toteppo-factory",
+      "category": "gourmet",
+      "parent": "グルメ",
+      "title": "十勝トテッポ工房",
+      "tags": ["北海道", "帯広", "チーズケーキ", "ケーキ", "焼き菓子", "スイーツ", "カフェ", "通販"],
+      "body": "ナチュラルチーズケーキが美味しい。店頭でも通販でも購入可能。カフェもある。\n\nホームページ\n　https://toteppo-factory.com/\n住所\n　〒080-0016 帯広市西6条南17丁目3-1\n電話\n　SHOP 0155-21-0101\n　CAFE 070-4177-2631"
+    },
+    {
+      "id": "gourmet-angeliquevoyage",
+      "category": "gourmet",
+      "parent": "グルメ",
+      "title": "アンジェリック ヴォヤージュ",
+      "tags": ["北海道", "函館", "チョコレート", "クレープ", "焼き菓子", "スイーツ", "通販"],
+      "body": "ショコラヴォヤージュ、賞味期限30分のクレープが美味しい。クレープは店頭のみ。。\n\nホームページ\n　https://angeliquevoyage.com/index.html\n住所\n　〒040-0056 北海道函館市弥生町3-11\n電話\n　0138-76-7150"
+    },
+    {
       "id": "pc-dvd-authoring-dvdstyler",
       "category": "pc",
       "parent": "パソコン",
@@ -109,6 +127,14 @@
       "title": "GAS Webhook(LINE Bot用)",
       "tags": ["GAS", "LINE", "Webhook", "Bot"],
       "body": "[事前準備・値の保管]\n1. LINE Developersで確認したチャネルアクセストークンとユーザーIDを控える\n2. GASのスクリプトプロパティにトークンなどを保存しておく\n※トークンやIDはコード直書きを避けると管理しやすい\n\n[受信(Webhook)の基本処理]\n1. GASにdoPost(e)関数を作成し、送信されたJSONデータ(e.postData.contents)をJSON.parseで読み取る\n2. events配列の中身を確認し、メッセージ内容や送信元ユーザーIDに応じて処理を分岐する\n3. 応答は200系ステータスで返す\n\n[送信(Push / Reply)の基本処理]\n1. Pushメッセージを送る場合は、Messaging APIのpushエンドポイントへAuthorizationヘッダー(Bearer トークン)付きでPOSTリクエストを送る\n2. 受信イベントへの返信ならreplyTokenを使ったreplyエンドポイントを利用する\n\n[デプロイと接続]\n1. GASエディタの「デプロイ」→「新しいデプロイ」から「ウェブアプリ」として公開する\n2. 発行されたウェブアプリのURLをLINE DevelopersのWebhook URLに貼り付け、「検証」で応答を確認する\n※GASのコードを変更して再保存した場合は、「デプロイを管理」から新しいバージョンで更新する"
+    },
+    {
+      "id": "pc-github-pages-publish-and-update",
+      "category": "pc",
+      "parent": "パソコン",
+      "title": "Webページ公開(GitHub)",
+      "tags": ["GitHub", "GitHub Pages", "HTML", "Web公開", "メール秘匿"],
+      "body": "[アカウント作成とメール秘匿設定]\n1. GitHubにアクセスして無料アカウントを作成する(ユーザー名は公開URLの一部になる)\n2. GitHubの「Settings」→「Emails」で「Keep my email addresses private」を有効にし、表示される「noreply」アドレスを控える\n3. ローカルGitを使う場合は「git config --global user.email \"noreplyアドレス\"」を設定し、「git config --global user.email」で反映を確認する\n※過去のコミット履歴に実アドレスが残っている場合は履歴書き換えや再作成が必要\n\n[リポジトリ準備とファイルアップロード]\n1. 右上の「＋」から「New repository」を選び、Repository nameを入力する(「ユーザー名.github.io」でルートURL、それ以外はサブパスURLになる)\n2. 公開範囲は「Public」を選択し、「Add README」をオンにして作成する(ファイル・フォルダ名は半角英数字にし、日本語やスペースは避ける)\n3. トップページを「index.html」として用意し、HTML・CSS・画像などのフォルダ構成を整えて「Add file」→「Upload files」からドラッグ＆ドロップし、「Commit changes」を押す\n\n[GitHub Pagesの有効化]\n1. リポジトリ上部の「Settings」タブを開き、左メニューの「Pages」を選択する\n2. 「Build and deployment」の「Branch」で公開元ブランチ(通常は「main」)とフォルダ(通常は「/ (root)」)を選び、「Save」を押す\n3. 反映まで数十秒〜数分待ち、Pages画面に表示されたURLにアクセスして表示を確認する\n\n[公開ページの更新]\n1. ブラウザから更新する場合は、対象ファイルを開いて鉛筆アイコン(Edit)から修正するか、「Upload files」で上書きして「Commit changes」を押す\n2. Gitを使う場合は、ローカルで編集後に「git add .」→「git commit -m \"...\"」→「git push origin main」で反映する\n3. 反映されない場合は数分待ってからリロードやシークレットウィンドウで確認する"
     },
     {
       "id": "phone-1",
