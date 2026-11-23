@@ -212,6 +212,18 @@ nav .sub {
   white-space: pre-line;
 }
 
+.badge-btn {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.badge-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
 /* スマホ向け調整（768px以下） */
 @media (max-width: 768px) {
   body {

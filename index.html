@@ -177,8 +177,10 @@
       document.getElementById("status").textContent = `表示中: ${list.length}件`;
       document.getElementById("cards").innerHTML = list.length
         ? list.map((it) => `
-            <article id="card-${it.id}" class="card">
-              <span class="badge">${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}</span>
+            <article class="card">
+              <button type="button" class="badge badge-btn" data-cat="${it.category}">
+                ${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}
+              </button>
               <h2>${it.title}</h2>
               <p>${it.body}</p>
             </article>
@@ -189,6 +191,22 @@
         jumpToCard(scrollToId);
       }
     }
+
+    document.getElementById("cards").addEventListener("click", (e) => {
+      const btn = e.target.closest(".badge-btn");
+      if (!btn) return;
+      const nextCat = btn.dataset.cat;
+      if (!nextCat) return;
+
+      // すでに同じカテゴリで絞り込み中なら「すべて」に戻す（トグル動作）
+      if (catFilter === nextCat && !itemFilter) {
+        catFilter = "all";
+      } else {
+        catFilter = nextCat;
+        itemFilter = null;
+      }
+      render();
+    });
 
     document.getElementById("menuToggle").addEventListener("click", () => {
       isMenuOpen = !isMenuOpen;
