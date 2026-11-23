@@ -224,6 +224,28 @@ nav .sub {
   transform: translateY(-1px);
 }
 
+/* 選択中のメニュー項目（フィルタ有効時） */
+.nav-btn.active {
+  background-color: #ffe4ec;
+  color: #9d174d;
+  font-weight: 700;
+}
+
+/* 絞り込み中のカテゴリと一致しているカードバッジ */
+.badge-btn.is-active-filter {
+  background-color: #db2777;
+  color: #ffffff;
+}
+
+/* フィルタ適用中のステータス表示 */
+.status.is-filtered {
+  background-color: #fdf2f8;
+  color: #9d174d;
+  border-left: 4px solid #db2777;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
 /* スマホ向け調整（768px以下） */
 @media (max-width: 768px) {
   body {

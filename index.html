@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ナレッジ</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
@@ -41,6 +41,9 @@
     const MOBILE_QUERY = "(max-width: 768px)";
     const isMobile = () => window.matchMedia(MOBILE_QUERY).matches;
     const catLabel = (id) => data.categories.find((c) => c.id === id)?.label || id;
+    const hasSearchQuery = () => Boolean(query);
+    const isFilterActive = () =>
+      !hasSearchQuery() && (catFilter !== "all" || Boolean(itemFilter));
 
     function syncMenuVisibility() {
       const toggleBtn = document.getElementById("menuToggle");
@@ -85,8 +88,9 @@
 
       const menu = document.getElementById("menu");
       menu.innerHTML = "";
+      const searching = hasSearchQuery();
 
-      addBtn(menu, "✨ すべて", catFilter === "all" && !itemFilter, () => {
+      addBtn(menu, "✨ すべて", !searching && catFilter === "all" && !itemFilter, () => {
         catFilter = "all";
         itemFilter = null;
         if (isMobile()) isMenuOpen = false;
@@ -99,7 +103,7 @@
         );
 
         if (!children.length) {
-          addBtn(menu, c.label, catFilter === c.id && !itemFilter, () => {
+          addBtn(menu, c.label, !searching && catFilter === c.id && !itemFilter, () => {
             catFilter = c.id;
             itemFilter = null;
             if (isMobile()) isMenuOpen = false;
@@ -115,7 +119,7 @@
         const summary = document.createElement("summary");
         summary.textContent = c.label;
         summary.className =
-          "nav-btn" + (catFilter === c.id && !itemFilter ? " active" : "");
+          "nav-btn" + (!searching && catFilter === c.id && !itemFilter ? " active" : "");
 
         summary.addEventListener("click", (e) => {
           e.preventDefault();
@@ -133,7 +137,7 @@
         const sub = document.createElement("ul");
         sub.className = "sub";
         children.forEach((ch) => {
-          addBtn(sub, " " + ch.title, itemFilter === ch.id, () => {
+          addBtn(sub, " " + ch.title, !searching && itemFilter === ch.id, () => {
             catFilter = c.id;
             itemFilter = ch.id;
             openCats.add(c.id);
@@ -151,12 +155,22 @@
 
     function getFilteredItems() {
       const q = query.toLowerCase();
+
+      // フリーワード入力中はフィルタを解除して全体から検索
+      if (q) {
+        return data.items.filter((it) =>
+          [it.title, it.body, it.parent || "", catLabel(it.category), ...(it.tags || [])]
+            .join(" ")
+            .toLowerCase()
+            .includes(q)
+        );
+      }
+
+      // フリーワードが空のときだけカテゴリ / アイテムのフィルタを適用
       return data.items.filter((it) => {
         if (itemFilter) return it.id === itemFilter;
         if (catFilter !== "all" && it.category !== catFilter) return false;
-        if (!q) return true;
-        return [it.title, it.body, it.parent || "", catLabel(it.category), ...(it.tags || [])]
-          .join(" ").toLowerCase().includes(q);
+        return true;
       });
     }
 
@@ -173,18 +187,32 @@
     function render(scrollToId = null) {
       renderMenu();
       const list = getFilteredItems();
+      const searching = hasSearchQuery();
+      const filtered = isFilterActive();
 
-      document.getElementById("status").textContent = `表示中: ${list.length}件`;
+      const statusEl = document.getElementById("status");
+      statusEl.classList.toggle("is-filtered", filtered);
+      statusEl.classList.toggle("is-searching", searching);
+      statusEl.textContent = searching
+        ? `全体検索中（「${query}」一致）: ${list.length}件`
+        : filtered
+          ? `フィルタ中（${catLabel(catFilter)}）: ${list.length}件`
+          : `表示中: ${list.length}件`;
+
       document.getElementById("cards").innerHTML = list.length
-        ? list.map((it) => `
-            <article class="card">
-              <button type="button" class="badge badge-btn" data-cat="${it.category}">
-                ${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}
-              </button>
-              <h2>${it.title}</h2>
-              <p>${it.body}</p>
-            </article>
-          `).join("")
+        ? list.map((it) => {
+            const isBadgeActive =
+              !searching && !itemFilter && catFilter !== "all" && catFilter === it.category;
+            return `
+              <article class="card" id="card-${it.id}">
+                <button type="button" class="badge badge-btn${isBadgeActive ? " is-active-filter" : ""}" data-cat="${it.category}">
+                  ${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}
+                </button>
+                <h2>${it.title}</h2>
+                <p>${it.body}</p>
+              </article>
+            `;
+          }).join("")
         : `<div class="card">該当するメモがありません</div>`;
 
       if (scrollToId) {
