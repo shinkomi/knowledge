@@ -13,7 +13,14 @@
       <input id="q" type="search" placeholder="フリーワード検索..." />
     </header>
     <div class="layout">
-      <nav><ul id="menu"></ul></nav>
+      <div class="nav-area">
+        <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="mainNav">
+          ☰ メニューを開く
+        </button>
+        <nav id="mainNav" class="nav">
+          <ul id="menu"></ul>
+        </nav>
+      </div>
       <main>
         <div id="status" class="status"></div>
         <div id="cards" class="cards"></div>
@@ -26,9 +33,39 @@
     let catFilter = "all";
     let itemFilter = null;
     let query = "";
+    let initializedOpen = false;
+    let isMenuOpen = false;
+    let searchJumpTimer = null;
     const openCats = new Set();
 
+    const MOBILE_QUERY = "(max-width: 768px)";
+    const isMobile = () => window.matchMedia(MOBILE_QUERY).matches;
     const catLabel = (id) => data.categories.find((c) => c.id === id)?.label || id;
+
+    function syncMenuVisibility() {
+      const toggleBtn = document.getElementById("menuToggle");
+      const nav = document.getElementById("mainNav");
+      if (!toggleBtn || !nav) return;
+
+      if (!isMobile()) {
+        nav.classList.remove("is-collapsed");
+        toggleBtn.setAttribute("aria-expanded", "true");
+        return;
+      }
+
+      nav.classList.toggle("is-collapsed", !isMenuOpen);
+      toggleBtn.setAttribute("aria-expanded", String(isMenuOpen));
+      toggleBtn.textContent = isMenuOpen ? "✕ メニューを閉じる" : "☰ メニューを開く";
+    }
+
+    function initDefaultOpenState() {
+      if (initializedOpen) return;
+      initializedOpen = true;
+      // PCは初回全開、スマホは閉じて省スペース化
+      if (!isMobile()) {
+        data.categories.forEach((c) => openCats.add(c.id));
+      }
+    }
 
     function addBtn(ul, label, active, onClick) {
       const li = document.createElement("li");
@@ -43,12 +80,16 @@
     }
 
     function renderMenu() {
+      initDefaultOpenState();
+      syncMenuVisibility();
+
       const menu = document.getElementById("menu");
       menu.innerHTML = "";
 
       addBtn(menu, "✨ すべて", catFilter === "all" && !itemFilter, () => {
         catFilter = "all";
         itemFilter = null;
+        if (isMobile()) isMenuOpen = false;
         render();
       });
 
@@ -61,6 +102,7 @@
           addBtn(menu, c.label, catFilter === c.id && !itemFilter, () => {
             catFilter = c.id;
             itemFilter = null;
+            if (isMobile()) isMenuOpen = false;
             render();
           });
           return;
@@ -68,11 +110,6 @@
 
         const li = document.createElement("li");
         const details = document.createElement("details");
-
-        // 初回だけ全開
-        if (openCats.size === 0) {
-          data.categories.forEach(c => openCats.add(c.id));
-        }
         details.open = openCats.has(c.id);
 
         const summary = document.createElement("summary");
@@ -100,7 +137,8 @@
             catFilter = c.id;
             itemFilter = ch.id;
             openCats.add(c.id);
-            render();
+            if (isMobile()) isMenuOpen = false;
+            render(ch.id);
           });
         });
 
@@ -111,32 +149,77 @@
       });
     }
 
-    function render() {
-      renderMenu();
+    function getFilteredItems() {
       const q = query.toLowerCase();
-      const list = data.items.filter((it) => {
+      return data.items.filter((it) => {
         if (itemFilter) return it.id === itemFilter;
         if (catFilter !== "all" && it.category !== catFilter) return false;
         if (!q) return true;
         return [it.title, it.body, it.parent || "", catLabel(it.category), ...(it.tags || [])]
           .join(" ").toLowerCase().includes(q);
       });
+    }
+
+    function jumpToCard(id) {
+      if (!id) return;
+      requestAnimationFrame(() => {
+        const target = document.getElementById(`card-${id}`);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+
+    function render(scrollToId = null) {
+      renderMenu();
+      const list = getFilteredItems();
 
       document.getElementById("status").textContent = `表示中: ${list.length}件`;
       document.getElementById("cards").innerHTML = list.length
         ? list.map((it) => `
-            <article class="card">
+            <article id="card-${it.id}" class="card">
               <span class="badge">${it.parent ? `${catLabel(it.category)} / ${it.title}` : catLabel(it.category)}</span>
               <h2>${it.title}</h2>
               <p>${it.body}</p>
             </article>
           `).join("")
         : `<div class="card">該当するメモがありません</div>`;
+
+      if (scrollToId) {
+        jumpToCard(scrollToId);
+      }
     }
 
-    document.getElementById("q").addEventListener("input", (e) => {
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      isMenuOpen = !isMenuOpen;
+      syncMenuVisibility();
+    });
+
+    window.addEventListener("resize", () => {
+      syncMenuVisibility();
+    });
+
+    const qInput = document.getElementById("q");
+
+    qInput.addEventListener("input", (e) => {
       query = e.target.value.trim();
       render();
+
+      clearTimeout(searchJumpTimer);
+      if (query) {
+        searchJumpTimer = setTimeout(() => {
+          const matched = getFilteredItems();
+          if (matched.length) jumpToCard(matched[0].id);
+        }, 350);
+      }
+    });
+
+    qInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && query) {
+        clearTimeout(searchJumpTimer);
+        const matched = getFilteredItems();
+        if (matched.length) jumpToCard(matched[0].id);
+      }
     });
 
     fetch("./memos.json?_=" + Date.now())

@@ -8,7 +8,11 @@
   --border: #f3dce4;
 }
 
-* { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -16,51 +20,111 @@ body {
   font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", sans-serif;
   background: var(--bg);
   color: var(--ink);
+  line-height: 1.5;
 }
 
-.wrap { max-width: 960px; margin: 0 auto; }
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
 
 header {
-  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
-  background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
-  padding: 14px 18px; margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
 }
 
-h1 { margin: 0; font-size: 1.15rem; }
+h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
 
 input[type="search"] {
-  padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--border);
-  background: var(--bg); color: var(--ink); min-width: 220px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+  min-width: 220px;
 }
 
-.layout { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items: start; }
-@media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
-
-nav, .card {
-  background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px;
+input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
-nav ul { list-style: none; margin: 0; padding: 0; }
-nav li { margin-bottom: 4px; }
-nav .sub { margin: 4px 0 6px 14px; padding-left: 8px; border-left: 2px dotted var(--border); }
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.nav-area {
+  min-width: 0;
+}
+
+main {
+  min-width: 0;
+}
+
+/* PCではスマホ用開閉ボタンを非表示 */
+.menu-toggle {
+  display: none;
+}
+
+nav,
+.card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.card {
+  scroll-margin-top: 16px;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  margin-bottom: 4px;
+}
 
 .nav-btn {
-  width: 100%; text-align: left; border: 0; background: transparent; color: var(--ink);
-  padding: 7px 10px; border-radius: 10px; cursor: pointer; font-size: 0.9rem;
-}
-.nav-btn:hover { background: var(--soft); }
-.nav-btn.active { background: var(--accent); color: #fff; font-weight: bold; }
-
-.status { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-
-.badge {
-  display: inline-block; font-size: 0.75rem; background: var(--soft); color: #d65a86;
-  padding: 2px 8px; border-radius: 999px; font-weight: bold;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  padding: 7px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.card h2 { margin: 8px 0 6px; font-size: 1rem; }
-.card p { margin: 0; font-size: 0.88rem; color: #63555d; white-space: pre-line; }
+.nav-btn:hover {
+  background: var(--soft);
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: bold;
+}
 
 nav details {
   margin-bottom: 4px;
@@ -75,6 +139,7 @@ nav summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 nav summary::-webkit-details-marker {
@@ -83,6 +148,16 @@ nav summary::-webkit-details-marker {
 
 nav summary:hover {
   background: var(--soft);
+}
+
+nav summary.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: bold;
+}
+
+nav summary.active::after {
+  color: #fff;
 }
 
 nav summary::after {
@@ -100,4 +175,113 @@ nav .sub {
   padding: 0 0 0 8px;
   list-style: none;
   border-left: 2px dotted var(--border);
+}
+
+.status {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: var(--soft);
+  color: #d65a86;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+.card h2 {
+  margin: 8px 0 6px;
+  font-size: 1rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #63555d;
+  white-space: pre-line;
+}
+
+/* スマホ向け調整（768px以下） */
+@media (max-width: 768px) {
+  body {
+    padding: 12px;
+  }
+
+  header {
+    padding: 12px 14px;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--card);
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .menu-toggle:hover {
+    background: var(--soft);
+  }
+
+  nav.is-collapsed {
+    display: none;
+  }
+
+  nav {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  #menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-btn,
+  nav summary {
+    padding: 6px 10px;
+    font-size: 0.875rem;
+  }
+
+  nav .sub {
+    margin-left: 10px;
+    padding-left: 8px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
 }
